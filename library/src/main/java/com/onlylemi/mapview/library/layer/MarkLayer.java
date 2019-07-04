@@ -150,4 +150,14 @@ public class MarkLayer extends MapBaseLayer {
     public interface MarkIsClickListener {
         void markIsClick(int num);
     }
+
+    /**
+     * @brief Allow us to change the mark icon by another bitmap
+     * @param bmpMark The new bitmap file we want as mark icon
+     *
+     * @author vtison
+     */
+    public void setBmpMark(Bitmap bmpMark){
+        this.bmpMark = bmpMark;
+    }
 }
