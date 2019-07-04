@@ -60,6 +60,7 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback {
 
     private float oldDist = 0, oldDegree = 0;
     private boolean isScaleAndRotateTogether = false;
+    private boolean isRotate = false;
 
     public MapView(Context context) {
         this(context, null);
@@ -226,16 +227,21 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback {
                         break;
                     case MapView.TOUCH_STATE_TWO_POINTED:
                         if (!isScaleAndRotateTogether) {
-                            float x = oldDist;
-                            float y = MapMath.getDistanceBetweenTwoPoints(event.getX(0),
-                                    event.getY(0), startTouch.x, startTouch.y);
-                            float z = distance(event, mid);
-                            float cos = (x * x + y * y - z * z) / (2 * x * y);
-                            float degree = (float) Math.toDegrees(Math.acos(cos));
+                            if (isRotate) {
+                                float x = oldDist;
+                                float y = MapMath.getDistanceBetweenTwoPoints(event.getX(0),
+                                        event.getY(0), startTouch.x, startTouch.y);
+                                float z = distance(event, mid);
+                                float cos = (x * x + y * y - z * z) / (2 * x * y);
+                                float degree = (float) Math.toDegrees(Math.acos(cos));
 
-                            if (degree < 120 && degree > 45) {
-                                oldDegree = rotation(event, mid);
-                                currentTouchState = MapView.TOUCH_STATE_ROTATE;
+                                if (degree < 120 && degree > 45) {
+                                    oldDegree = rotation(event, mid);
+                                    currentTouchState = MapView.TOUCH_STATE_ROTATE;
+                                } else {
+                                    oldDist = distance(event, mid);
+                                    currentTouchState = MapView.TOUCH_STATE_SCALE;
+                                }
                             } else {
                                 oldDist = distance(event, mid);
                                 currentTouchState = MapView.TOUCH_STATE_SCALE;
@@ -403,6 +409,10 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback {
         return isScaleAndRotateTogether;
     }
 
+    public boolean isRotate(){
+        return isRotate;
+    }
+
     /**
      * setting scale&rotate is/not together on touch
      *
@@ -410,6 +420,10 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback {
      */
     public void setScaleAndRotateTogether(boolean scaleAndRotateTogether) {
         isScaleAndRotateTogether = scaleAndRotateTogether;
+    }
+
+    public void setRotate(boolean isRotate){
+        this.isRotate = isRotate;
     }
 
     public void setMaxZoom(float maxZoom) {
