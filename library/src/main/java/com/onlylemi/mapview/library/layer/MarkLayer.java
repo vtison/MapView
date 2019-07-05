@@ -10,8 +10,9 @@ import android.graphics.PointF;
 import android.view.MotionEvent;
 
 import com.onlylemi.mapview.library.MapView;
-import com.onlylemi.mapview.library.utils.MapMath;
+import com.onlylemi.mapview.library.Marker;
 import com.onlylemi.mapview.library.R;
+import com.onlylemi.mapview.library.utils.MapMath;
 
 import java.util.List;
 
@@ -22,7 +23,7 @@ import java.util.List;
  */
 public class MarkLayer extends MapBaseLayer {
 
-    private List<PointF> marks;
+    private List<Marker> marks;
     private List<String> marksName;
     private MarkIsClickListener listener;
 
@@ -39,7 +40,7 @@ public class MarkLayer extends MapBaseLayer {
         this(mapView, null, null);
     }
 
-    public MarkLayer(MapView mapView, List<PointF> marks, List<String> marksName) {
+    public MarkLayer(MapView mapView, List<Marker> marks, List<String> marksName) {
         super(mapView);
         this.marks = marks;
         this.marksName = marksName;
@@ -63,9 +64,7 @@ public class MarkLayer extends MapBaseLayer {
             if (!marks.isEmpty()) {
                 float[] goal = mapView.convertMapXYToScreenXY(event.getX(), event.getY());
                 for (int i = 0; i < marks.size(); i++) {
-                    if (MapMath.getDistanceBetweenTwoPoints(goal[0], goal[1],
-                            marks.get(i).x - bmpMark.getWidth() / 2, marks.get(i).y - bmpMark
-                                    .getHeight() / 2) <= 50) {
+                    if (MapMath.getDistanceBetweenTwoPoints(goal[0], goal[1],marks.get(i).getPoint().x, marks.get(i).getPoint().y) <= (40/mapView.getCurrentZoom())) {
                         num = i;
                         isClickMark = true;
                         break;
@@ -77,8 +76,9 @@ public class MarkLayer extends MapBaseLayer {
                 }
             }
 
-            if (listener != null && isClickMark) {
-                listener.markIsClick(num);
+            if (listener != null) {
+                if (isClickMark)
+                    listener.markIsClick(num);
                 mapView.refresh();
             }
         }
@@ -91,9 +91,21 @@ public class MarkLayer extends MapBaseLayer {
             canvas.save();
             if (!marks.isEmpty()) {
                 for (int i = 0; i < marks.size(); i++) {
-                    PointF mark = marks.get(i);
+                    Bitmap bmpMarkUse, bmpMarkTouchUse;
+                    PointF mark = marks.get(i).getPoint();
                     float[] goal = {mark.x, mark.y};
                     currentMatrix.mapPoints(goal);
+
+                    if (marks.get(i).getBtmp() != null)
+                        bmpMarkUse = marks.get(i).getBtmp();
+                    else
+                        bmpMarkUse = bmpMark;
+
+                    if (marks.get(i).getBtmpSelect() != null)
+                        bmpMarkTouchUse = marks.get(i).getBtmpSelect();
+                    else
+                        bmpMarkTouchUse = bmpMarkTouch;
+
 
                     paint.setColor(Color.BLACK);
                     paint.setTextSize(radiusMark);
@@ -107,19 +119,19 @@ public class MarkLayer extends MapBaseLayer {
                     if (replaceMarkIconOnClick) {
 
                         if (i == num && isClickMark) {
-                            canvas.drawBitmap(bmpMarkTouch, goal[0] - bmpMarkTouch.getWidth() / 2,
-                                    goal[1] - bmpMarkTouch.getHeight(), paint);
+                            canvas.drawBitmap(bmpMarkTouchUse, goal[0] - bmpMarkTouchUse.getWidth() / 2,
+                                    goal[1] - bmpMarkTouchUse.getHeight(), paint);
                         } else {
-                            canvas.drawBitmap(bmpMark, goal[0] - bmpMark.getWidth() / 2,
-                                    goal[1] - bmpMarkTouch.getHeight(), paint);
+                            canvas.drawBitmap(bmpMarkUse, goal[0] - bmpMarkUse.getWidth() / 2,
+                                    goal[1] - bmpMarkUse.getHeight(), paint);
                         }
                     } else {
-                        canvas.drawBitmap(bmpMark, goal[0] - bmpMark.getWidth() / 2,
-                                    goal[1] - bmpMark.getHeight() / 2, paint);
+                        canvas.drawBitmap(bmpMarkUse, goal[0] - bmpMarkUse.getWidth() / 2,
+                                    goal[1] - bmpMarkUse.getHeight() / 2, paint);
 
                         if (i == num && isClickMark) {
-                            canvas.drawBitmap(bmpMarkTouch, goal[0] - bmpMarkTouch.getWidth() / 2,
-                                    goal[1] - bmpMarkTouch.getHeight(), paint);
+                            canvas.drawBitmap(bmpMarkTouchUse, goal[0] - bmpMarkTouchUse.getWidth() / 2,
+                                    goal[1] - bmpMarkTouchUse.getHeight(), paint);
                         }
                     }
                 }
@@ -136,11 +148,11 @@ public class MarkLayer extends MapBaseLayer {
         this.num = num;
     }
 
-    public List<PointF> getMarks() {
+    public List<Marker> getMarks() {
         return marks;
     }
 
-    public void setMarks(List<PointF> marks) {
+    public void setMarks(List<Marker> marks) {
         this.marks = marks;
     }
 
