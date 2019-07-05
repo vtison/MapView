@@ -60,7 +60,7 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback {
 
     private float oldDist = 0, oldDegree = 0;
     private boolean isScaleAndRotateTogether = false;
-    private boolean isRotate = false;
+    private boolean isRotate = true;
 
     public MapView(Context context) {
         this(context, null);
@@ -409,6 +409,11 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback {
         return isScaleAndRotateTogether;
     }
 
+    /**
+     * @return true if rotation is allowed, else false
+     *
+     * @author vtison
+     */
     public boolean isRotate(){
         return isRotate;
     }
@@ -422,6 +427,12 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback {
         isScaleAndRotateTogether = scaleAndRotateTogether;
     }
 
+    /**
+     * @brief Allow to enable/disable the rotation
+     * @param isRotate true if you want to rotate, else false
+     *
+     * @author vtison
+     */
     public void setRotate(boolean isRotate){
         this.isRotate = isRotate;
     }

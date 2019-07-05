@@ -31,6 +31,7 @@ public class MarkLayer extends MapBaseLayer {
     private float radiusMark;
     private boolean isClickMark = false;
     private int num = -1;
+    private boolean replaceMarkIconOnClick = false;
 
     private Paint paint;
 
@@ -102,12 +103,24 @@ public class MarkLayer extends MapBaseLayer {
                         canvas.drawText(marksName.get(i), goal[0] - radiusMark, goal[1] -
                                 radiusMark / 2, paint);
                     }
-                    //mark ico
-                    canvas.drawBitmap(bmpMark, goal[0] - bmpMark.getWidth() / 2,
-                            goal[1] - bmpMark.getHeight() / 2, paint);
-                    if (i == num && isClickMark) {
-                        canvas.drawBitmap(bmpMarkTouch, goal[0] - bmpMarkTouch.getWidth() / 2,
-                                goal[1] - bmpMarkTouch.getHeight(), paint);
+
+                    if (replaceMarkIconOnClick) {
+
+                        if (i == num && isClickMark) {
+                            canvas.drawBitmap(bmpMarkTouch, goal[0] - bmpMarkTouch.getWidth() / 2,
+                                    goal[1] - bmpMarkTouch.getHeight(), paint);
+                        } else {
+                            canvas.drawBitmap(bmpMark, goal[0] - bmpMark.getWidth() / 2,
+                                    goal[1] - bmpMarkTouch.getHeight(), paint);
+                        }
+                    } else {
+                        canvas.drawBitmap(bmpMark, goal[0] - bmpMark.getWidth() / 2,
+                                    goal[1] - bmpMark.getHeight() / 2, paint);
+
+                        if (i == num && isClickMark) {
+                            canvas.drawBitmap(bmpMarkTouch, goal[0] - bmpMarkTouch.getWidth() / 2,
+                                    goal[1] - bmpMarkTouch.getHeight(), paint);
+                        }
                     }
                 }
             }
@@ -159,5 +172,26 @@ public class MarkLayer extends MapBaseLayer {
      */
     public void setBmpMark(Bitmap bmpMark){
         this.bmpMark = bmpMark;
+    }
+
+    /**
+     * @brief Allow us to change the mark touch icon by another bitmap
+     * @param bmpMarkTouch The new bitmap file we want as mark touch icon
+     *
+     * @author vtison
+     */
+    public void setBmpMarkTouch(Bitmap bmpMarkTouch){
+        this.bmpMarkTouch = bmpMarkTouch;
+    }
+
+    /**
+     * @brief Enable/Disable the replacement of mark icon when it's touch or not
+     * @param replaceMarkIconOnClick if false, the mark touch icon will be displayed with mark icon,
+     *                               else, only one will be displayed (either mark icon, either mark touch icon)
+     *
+     * @author vtison
+     */
+    public void setReplaceMarkIconOnClick(boolean replaceMarkIconOnClick){
+        this.replaceMarkIconOnClick = replaceMarkIconOnClick;
     }
 }
