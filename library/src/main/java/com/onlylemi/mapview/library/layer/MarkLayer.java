@@ -24,7 +24,6 @@ import java.util.List;
 public class MarkLayer extends MapBaseLayer {
 
     private List<Marker> marks;
-    private List<String> marksName;
     private MarkIsClickListener listener;
 
     private Bitmap bmpMark, bmpMarkTouch;
@@ -37,13 +36,12 @@ public class MarkLayer extends MapBaseLayer {
     private Paint paint;
 
     public MarkLayer(MapView mapView) {
-        this(mapView, null, null);
+        this(mapView, null);
     }
 
-    public MarkLayer(MapView mapView, List<Marker> marks, List<String> marksName) {
+    public MarkLayer(MapView mapView, List<Marker> marks) {
         super(mapView);
         this.marks = marks;
-        this.marksName = marksName;
 
         initLayer();
     }
@@ -110,9 +108,9 @@ public class MarkLayer extends MapBaseLayer {
                     paint.setColor(Color.BLACK);
                     paint.setTextSize(radiusMark);
                     //mark name
-                    if (mapView.getCurrentZoom() > 1.0 && marksName != null
-                            && marksName.size() == marks.size()) {
-                        canvas.drawText(marksName.get(i), goal[0] - radiusMark, goal[1] -
+                    if (mapView.getCurrentZoom() > 1.0 && marks != null
+                            && marks.size() == marks.size()) {
+                        canvas.drawText(marks.get(i).getLabel(), goal[0] - radiusMark, goal[1] -
                                 radiusMark / 2, paint);
                     }
 
@@ -154,14 +152,6 @@ public class MarkLayer extends MapBaseLayer {
 
     public void setMarks(List<Marker> marks) {
         this.marks = marks;
-    }
-
-    public List<String> getMarksName() {
-        return marksName;
-    }
-
-    public void setMarksName(List<String> marksName) {
-        this.marksName = marksName;
     }
 
     public boolean isClickMark() {
