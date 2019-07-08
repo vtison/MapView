@@ -196,4 +196,13 @@ public class MarkLayer extends MapBaseLayer {
     public void setReplaceMarkIconOnClick(boolean replaceMarkIconOnClick){
         this.replaceMarkIconOnClick = replaceMarkIconOnClick;
     }
+
+    /**
+     * @brief allow to set click mark at false
+     *
+     * @author vtison
+     */
+    public void setUnclickMark(){
+        isClickMark = false;
+    }
 }
