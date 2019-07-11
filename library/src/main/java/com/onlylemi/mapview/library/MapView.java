@@ -445,6 +445,14 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback {
         this.minZoom = minZoom;
     }
 
+    public float getMinZoom(){
+        return minZoom;
+    }
+
+    public float getMaxZoom(){
+        return maxZoom;
+    }
+
     public void setCurrentZoom(float zoom) {
         setCurrentZoom(zoom, getWidth() / 2, getHeight() / 2);
     }
