@@ -30,10 +30,15 @@ public class MarkLayer extends MapBaseLayer {
     private Bitmap bmpMark, bmpMarkTouch;
 
     private float radiusMark;
+    /** isClickmark: the click just occurs != isSelectMark: the click on mark occurs but an another click out of one mark can occur between */
     private boolean isClickMark = false;
+    private boolean isSelectedMark = false;
+
     private int num = -1;
     private boolean replaceMarkIconOnClick = false;
     private boolean isResizing = false;
+    /** Unselect the mark on the next click or not */
+    private boolean isPersistingSelection = false;
 
     private Paint paint;
     /** Contains the associated Rect for each marks draw in the map. Used to find click event on all the mark bitmap */
@@ -71,11 +76,14 @@ public class MarkLayer extends MapBaseLayer {
                     if (mBitmapRectList.get(i).contains((int) event.getX(), (int) event.getY())){
                         num = i;
                         isClickMark = true;
+                        isSelectedMark = true;
                         break;
                     }
 
                     if (i == marks.size() - 1) {
                         isClickMark = false;
+                        if (!isPersistingSelection)
+                            isSelectedMark = false;
                     }
                 }
             }
@@ -121,7 +129,7 @@ public class MarkLayer extends MapBaseLayer {
                     Rect tpmBitmapRect;
                     if (isResizing){
                         if (replaceMarkIconOnClick) {
-                            if (i == num && isClickMark) {
+                            if (i == num && isSelectedMark) {
                                 tpmBitmapRect = new Rect((int) (goal[0] - bmpMarkTouchUse.getWidth() * currentZoom / 3),
                                         (int) (goal[1] - bmpMarkTouchUse.getHeight() * currentZoom), (int) (goal[0] + 2 * bmpMarkTouchUse.getWidth() * currentZoom / 3), (int) (goal[1]));
                                 canvas.drawBitmap(bmpMarkTouchUse, null, tpmBitmapRect, paint);
@@ -137,14 +145,14 @@ public class MarkLayer extends MapBaseLayer {
                             canvas.drawBitmap(bmpMarkUse, null, tpmBitmapRect, paint);
                             mBitmapRectList.set(i, tpmBitmapRect);
 
-                            if (i == num && isClickMark) {
+                            if (i == num && isSelectedMark) {
                                 canvas.drawBitmap(bmpMarkTouchUse, null, new Rect((int) (goal[0] - bmpMarkTouchUse.getWidth() * currentZoom / 3),
                                         (int) (goal[1] - bmpMarkTouchUse.getHeight() * currentZoom), (int) (goal[0] + 2 * bmpMarkTouchUse.getWidth() * currentZoom / 3), (int) (goal[1])), paint);
                             }
                         }//replaceIconOnClick
                     } else {
                         if (replaceMarkIconOnClick) {
-                            if (i == num && isClickMark) {
+                            if (i == num && isSelectedMark) {
                                 tpmBitmapRect = new Rect((int) goal[0] - bmpMarkTouchUse.getWidth() / 3, (int) goal[1] - bmpMarkTouchUse.getHeight(),
                                         (int) (goal[0] + 2 * bmpMarkTouchUse.getWidth() / 3), (int) (goal[1]));
                                 canvas.drawBitmap(bmpMarkTouchUse, null, tpmBitmapRect, paint);
@@ -160,7 +168,7 @@ public class MarkLayer extends MapBaseLayer {
                             canvas.drawBitmap(bmpMarkUse, null, tpmBitmapRect, paint);
                             mBitmapRectList.set(i, tpmBitmapRect);
 
-                            if (i == num && isClickMark) {
+                            if (i == num && isSelectedMark) {
                                 canvas.drawBitmap(bmpMarkTouchUse, goal[0] - (float) bmpMarkTouchUse.getWidth() / 3,
                                         goal[1] - bmpMarkTouchUse.getHeight(), paint);
                             }
@@ -232,12 +240,12 @@ public class MarkLayer extends MapBaseLayer {
     }
 
     /**
-     * @brief allow to set click mark at false
+     * @brief allow to unselect mark on map
      *
      * @author vtison
      */
     public void setUnclickMark(){
-        isClickMark = false;
+        isSelectedMark = false;
     }
 
     /**
@@ -258,5 +266,15 @@ public class MarkLayer extends MapBaseLayer {
      */
     public boolean isResizing(){
         return isResizing;
+    }
+
+    /**
+     * @brief Allow to choose if we want to keep mark selected or not
+     * @param isPersistingSelection true if we want to keep mark selected, else false
+     *
+     * @author vtison
+     */
+    public void setPersistingSelection(boolean isPersistingSelection){
+        this.isPersistingSelection = isPersistingSelection;
     }
 }
