@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.graphics.Rect;
 import android.view.MotionEvent;
 
 import com.onlylemi.mapview.library.MapView;
@@ -32,6 +33,7 @@ public class MarkLayer extends MapBaseLayer {
     private boolean isClickMark = false;
     private int num = -1;
     private boolean replaceMarkIconOnClick = false;
+    private boolean isResizing = false;
 
     private Paint paint;
 
@@ -108,32 +110,51 @@ public class MarkLayer extends MapBaseLayer {
                     paint.setColor(Color.BLACK);
                     paint.setTextSize(radiusMark);
                     //mark name
-                    if (mapView.getCurrentZoom() > 1.0 && marks != null
-                            && marks.size() == marks.size()) {
+                    if (mapView.getCurrentZoom() > 1.0 && marks != null) {
                         canvas.drawText(marks.get(i).getLabel(), goal[0] - radiusMark, goal[1] -
                                 radiusMark / 2, paint);
                     }
 
-                    if (replaceMarkIconOnClick) {
-
-                        if (i == num && isClickMark) {
-                            canvas.drawBitmap(bmpMarkTouchUse, goal[0] - bmpMarkTouchUse.getWidth() / 2,
-                                    goal[1] - bmpMarkTouchUse.getHeight(), paint);
+                    if (isResizing){
+                        if (replaceMarkIconOnClick) {
+                            if (i == num && isClickMark) {
+                                canvas.drawBitmap(bmpMarkTouchUse, null, new Rect((int) (goal[0] - bmpMarkTouchUse.getWidth() * currentZoom / 2),
+                                        (int) (goal[1] - bmpMarkTouchUse.getHeight() * currentZoom), (int) (goal[0] + bmpMarkTouchUse.getWidth() * currentZoom / 2), (int) (goal[1])), paint);
+                            } else {
+                                canvas.drawBitmap(bmpMarkUse, null, new Rect((int) (goal[0] - (bmpMarkUse.getWidth() * currentZoom) / 2),
+                                        (int) (goal[1] - (bmpMarkUse.getHeight() * currentZoom)), (int) (goal[0] + (bmpMarkUse.getWidth() * currentZoom) / 2), (int) goal[1]), paint);
+                            }
                         } else {
-                            canvas.drawBitmap(bmpMarkUse, goal[0] - bmpMarkUse.getWidth() / 2,
-                                    goal[1] - bmpMarkUse.getHeight(), paint);
-                        }
-                    } else {
-                        canvas.drawBitmap(bmpMarkUse, goal[0] - bmpMarkUse.getWidth() / 2,
-                                    goal[1] - bmpMarkUse.getHeight() / 2, paint);
+                            canvas.drawBitmap(bmpMarkUse, null, new Rect((int) (goal[0] - bmpMarkUse.getWidth() * currentZoom / 2), (int) (goal[1] - bmpMarkUse.getHeight() * currentZoom / 2),
+                                    (int) (goal[0] + bmpMarkUse.getWidth() * currentZoom / 2), (int) (goal[1] + bmpMarkUse.getHeight() * currentZoom /2)), paint);
 
-                        if (i == num && isClickMark) {
-                            canvas.drawBitmap(bmpMarkTouchUse, goal[0] - bmpMarkTouchUse.getWidth() / 2,
-                                    goal[1] - bmpMarkTouchUse.getHeight(), paint);
-                        }
-                    }
-                }
-            }
+                            if (i == num && isClickMark) {
+                                canvas.drawBitmap(bmpMarkTouchUse, null, new Rect((int) (goal[0] - bmpMarkTouchUse.getWidth() * currentZoom / 2),
+                                        (int) (goal[1] - bmpMarkTouchUse.getHeight() * currentZoom), (int) (goal[0] + bmpMarkTouchUse.getWidth() * currentZoom / 2), (int) (goal[1])), paint);
+                            }
+                        }//replaceIconOnClick
+                    } else {
+                        if (replaceMarkIconOnClick) {
+
+                            if (i == num && isClickMark) {
+                                canvas.drawBitmap(bmpMarkTouchUse, goal[0] - (float) bmpMarkTouchUse.getWidth() / 2,
+                                        goal[1] - bmpMarkTouchUse.getHeight(), paint);
+                            } else {
+                                canvas.drawBitmap(bmpMarkUse, goal[0] - (float) bmpMarkUse.getWidth() / 2,
+                                        goal[1] - (float) bmpMarkUse.getHeight(), paint);
+                            }
+                        } else {
+                            canvas.drawBitmap(bmpMarkUse, goal[0] - (float) bmpMarkUse.getWidth() / 2,
+                                    goal[1] - (float) bmpMarkUse.getHeight() / 2, paint);
+
+                            if (i == num && isClickMark) {
+                                canvas.drawBitmap(bmpMarkTouchUse, goal[0] - (float) bmpMarkTouchUse.getWidth() / 2,
+                                        goal[1] - bmpMarkTouchUse.getHeight(), paint);
+                            }
+                        }//replaceIconOnClick
+                    }//isResizing
+                }//for
+            }//if !mark.isEmpty()
             canvas.restore();
         }
     }
@@ -204,5 +225,25 @@ public class MarkLayer extends MapBaseLayer {
      */
     public void setUnclickMark(){
         isClickMark = false;
+    }
+
+    /**
+     * @brief Allow to set resize for marks
+     * @param isResizing true to dynamically resize marks, else false and marks got always the same size
+     *
+     * @author vtison
+     */
+    public void setResizing(boolean isResizing){
+        this.isResizing = isResizing;
+    }
+
+    /**
+     * @brief Return if we resize the marks or not
+     * @return true if the marks are dynamically resize, else false
+     *
+     * @author vtison
+     */
+    public boolean isResizing(){
+        return isResizing;
     }
 }
