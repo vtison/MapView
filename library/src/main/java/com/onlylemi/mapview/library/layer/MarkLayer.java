@@ -13,8 +13,8 @@ import android.view.MotionEvent;
 import com.onlylemi.mapview.library.MapView;
 import com.onlylemi.mapview.library.Marker;
 import com.onlylemi.mapview.library.R;
-import com.onlylemi.mapview.library.utils.MapMath;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,6 +36,8 @@ public class MarkLayer extends MapBaseLayer {
     private boolean isResizing = false;
 
     private Paint paint;
+    /** Contains the associated Rect for each marks draw in the map. Used to find click event on all the mark bitmap */
+    private ArrayList<Rect> mBitmapRectList;
 
     public MarkLayer(MapView mapView) {
         this(mapView, null);
@@ -53,6 +55,9 @@ public class MarkLayer extends MapBaseLayer {
 
         bmpMark = BitmapFactory.decodeResource(mapView.getResources(), R.mipmap.mark);
         bmpMarkTouch = BitmapFactory.decodeResource(mapView.getResources(), R.mipmap.mark_touch);
+        mBitmapRectList = new ArrayList<>(marks.size());
+        for (int i = 0; i < marks.size(); i++)
+            mBitmapRectList.add(null);
         paint = new Paint();
         paint.setAntiAlias(true);
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
@@ -62,9 +67,8 @@ public class MarkLayer extends MapBaseLayer {
     public void onTouch(MotionEvent event) {
         if (marks != null) {
             if (!marks.isEmpty()) {
-                float[] goal = mapView.convertMapXYToScreenXY(event.getX(), event.getY());
                 for (int i = 0; i < marks.size(); i++) {
-                    if (MapMath.getDistanceBetweenTwoPoints(goal[0], goal[1],marks.get(i).getPoint().x, marks.get(i).getPoint().y) <= (40/mapView.getCurrentZoom())) {
+                    if (mBitmapRectList.get(i).contains((int) event.getX(), (int) event.getY())){
                         num = i;
                         isClickMark = true;
                         break;
@@ -114,41 +118,50 @@ public class MarkLayer extends MapBaseLayer {
                         canvas.drawText(marks.get(i).getLabel(), goal[0] - radiusMark, goal[1] -
                                 radiusMark / 2, paint);
                     }
-
+                    Rect tpmBitmapRect;
                     if (isResizing){
                         if (replaceMarkIconOnClick) {
                             if (i == num && isClickMark) {
-                                canvas.drawBitmap(bmpMarkTouchUse, null, new Rect((int) (goal[0] - bmpMarkTouchUse.getWidth() * currentZoom / 2),
-                                        (int) (goal[1] - bmpMarkTouchUse.getHeight() * currentZoom), (int) (goal[0] + bmpMarkTouchUse.getWidth() * currentZoom / 2), (int) (goal[1])), paint);
+                                tpmBitmapRect = new Rect((int) (goal[0] - bmpMarkTouchUse.getWidth() * currentZoom / 3),
+                                        (int) (goal[1] - bmpMarkTouchUse.getHeight() * currentZoom), (int) (goal[0] + 2 * bmpMarkTouchUse.getWidth() * currentZoom / 3), (int) (goal[1]));
+                                canvas.drawBitmap(bmpMarkTouchUse, null, tpmBitmapRect, paint);
                             } else {
-                                canvas.drawBitmap(bmpMarkUse, null, new Rect((int) (goal[0] - (bmpMarkUse.getWidth() * currentZoom) / 2),
-                                        (int) (goal[1] - (bmpMarkUse.getHeight() * currentZoom)), (int) (goal[0] + (bmpMarkUse.getWidth() * currentZoom) / 2), (int) goal[1]), paint);
+                                tpmBitmapRect = new Rect((int) (goal[0] - bmpMarkUse.getWidth() * currentZoom / 3),
+                                        (int) (goal[1] - bmpMarkUse.getHeight() * currentZoom), (int) (goal[0] + 2 * bmpMarkUse.getWidth() * currentZoom / 3), (int) goal[1]);
+                                canvas.drawBitmap(bmpMarkUse, null, tpmBitmapRect, paint);
                             }
+                            mBitmapRectList.set(i, tpmBitmapRect);
                         } else {
-                            canvas.drawBitmap(bmpMarkUse, null, new Rect((int) (goal[0] - bmpMarkUse.getWidth() * currentZoom / 2), (int) (goal[1] - bmpMarkUse.getHeight() * currentZoom / 2),
-                                    (int) (goal[0] + bmpMarkUse.getWidth() * currentZoom / 2), (int) (goal[1] + bmpMarkUse.getHeight() * currentZoom /2)), paint);
+                            tpmBitmapRect = new Rect((int) (goal[0] - bmpMarkUse.getWidth() * currentZoom / 3), (int) (goal[1] - bmpMarkUse.getHeight() * currentZoom / 2),
+                                    (int) (goal[0] + 2 * bmpMarkUse.getWidth() * currentZoom / 3), (int) (goal[1] + bmpMarkUse.getHeight() * currentZoom /2));
+                            canvas.drawBitmap(bmpMarkUse, null, tpmBitmapRect, paint);
+                            mBitmapRectList.set(i, tpmBitmapRect);
 
                             if (i == num && isClickMark) {
-                                canvas.drawBitmap(bmpMarkTouchUse, null, new Rect((int) (goal[0] - bmpMarkTouchUse.getWidth() * currentZoom / 2),
-                                        (int) (goal[1] - bmpMarkTouchUse.getHeight() * currentZoom), (int) (goal[0] + bmpMarkTouchUse.getWidth() * currentZoom / 2), (int) (goal[1])), paint);
+                                canvas.drawBitmap(bmpMarkTouchUse, null, new Rect((int) (goal[0] - bmpMarkTouchUse.getWidth() * currentZoom / 3),
+                                        (int) (goal[1] - bmpMarkTouchUse.getHeight() * currentZoom), (int) (goal[0] + 2 * bmpMarkTouchUse.getWidth() * currentZoom / 3), (int) (goal[1])), paint);
                             }
                         }//replaceIconOnClick
                     } else {
                         if (replaceMarkIconOnClick) {
-
                             if (i == num && isClickMark) {
-                                canvas.drawBitmap(bmpMarkTouchUse, goal[0] - (float) bmpMarkTouchUse.getWidth() / 2,
-                                        goal[1] - bmpMarkTouchUse.getHeight(), paint);
+                                tpmBitmapRect = new Rect((int) goal[0] - bmpMarkTouchUse.getWidth() / 3, (int) goal[1] - bmpMarkTouchUse.getHeight(),
+                                        (int) (goal[0] + 2 * bmpMarkTouchUse.getWidth() / 3), (int) (goal[1]));
+                                canvas.drawBitmap(bmpMarkTouchUse, null, tpmBitmapRect, paint);
                             } else {
-                                canvas.drawBitmap(bmpMarkUse, goal[0] - (float) bmpMarkUse.getWidth() / 2,
-                                        goal[1] - (float) bmpMarkUse.getHeight(), paint);
+                                tpmBitmapRect = new Rect((int) goal[0] - bmpMarkTouchUse.getWidth() / 3, (int) goal[1] - bmpMarkTouchUse.getHeight(),
+                                        (int) (goal[0] + 2 * bmpMarkTouchUse.getWidth() / 3), (int) (goal[1]));
+                                canvas.drawBitmap(bmpMarkUse, null, tpmBitmapRect, paint);
                             }
+                            mBitmapRectList.set(i, tpmBitmapRect);
                         } else {
-                            canvas.drawBitmap(bmpMarkUse, goal[0] - (float) bmpMarkUse.getWidth() / 2,
-                                    goal[1] - (float) bmpMarkUse.getHeight() / 2, paint);
+                            tpmBitmapRect = new Rect((int) (goal[0] - bmpMarkUse.getWidth() / 3), (int) (goal[1] - bmpMarkUse.getHeight() / 2),
+                                    (int) (goal[0] + 2 * bmpMarkUse.getWidth() / 3), (int) (goal[1] + bmpMarkUse.getHeight() / 2));
+                            canvas.drawBitmap(bmpMarkUse, null, tpmBitmapRect, paint);
+                            mBitmapRectList.set(i, tpmBitmapRect);
 
                             if (i == num && isClickMark) {
-                                canvas.drawBitmap(bmpMarkTouchUse, goal[0] - (float) bmpMarkTouchUse.getWidth() / 2,
+                                canvas.drawBitmap(bmpMarkTouchUse, goal[0] - (float) bmpMarkTouchUse.getWidth() / 3,
                                         goal[1] - bmpMarkTouchUse.getHeight(), paint);
                             }
                         }//replaceIconOnClick
