@@ -277,4 +277,15 @@ public class MarkLayer extends MapBaseLayer {
     public void setPersistingSelection(boolean isPersistingSelection){
         this.isPersistingSelection = isPersistingSelection;
     }
+
+    /**
+     * @brief Allow to select a mark by another way as click
+     * @param num Numero of the mark we want to select
+     *
+     * @author vtison
+     */
+    public void setClickMark(int num){
+        this.num = num;
+        isSelectedMark = true;
+    }
 }
